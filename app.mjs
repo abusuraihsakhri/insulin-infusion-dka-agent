@@ -46,7 +46,7 @@ form.addEventListener('submit', (event) => {
     output('potassium', data.potassiumStatus);
     output('change', data.glucoseChange === null
       ? 'Not calculated (prior glucose and interval optional).'
-      : `${data.glucoseChange.toFixed(1)} mg/dL/hour (${data.glucoseChange >= 0 ? 'falling' : 'rising'}).`);
+      : `${data.glucoseChange.toFixed(1)} mg/dL/hour (${data.glucoseChange > 0 ? 'falling' : data.glucoseChange < 0 ? 'rising' : 'unchanged'}).`);
     const banner = document.querySelector('#out-potassium');
     banner.classList.toggle('danger', data.lowPotassium);
     document.querySelector('#resolution').classList.toggle('caution', !data.resolutionCriteriaMet);
