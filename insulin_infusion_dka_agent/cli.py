@@ -51,7 +51,7 @@ def main(argv=None):
         dossier = coordinator.process_case(case)
         print("=" * 80)
         print(f"  DKAGUARD: DIABETIC KETOACIDOSIS & HHS INSULIN INFUSION / POTASSIUM SENTINEL")
-        print(f"  Domain: Endocrinology / ICU | Standard: ADA Standards of Care Diabetic Ketoacidosis")
+        print(f"  Domain: Endocrinology / ICU | Standard: generic demonstration thresholds (not validated clinical rules)")
         print(f"  Case: {dossier['case_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:
