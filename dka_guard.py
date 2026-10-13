@@ -179,7 +179,7 @@ def create_app():
 
         app = FastAPI(
             title="DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel",
-            description="Calculates hourly IV regular insulin titration (0.1 u/kg/h), target glucose drops (50-75 mg/dL/h), 2-bag IV fluid titration, and DKA resolution criteria.",
+            description="Legacy generic numerical metrics demonstration; not for clinical dosing.",
             version="1.0.0",
         )
 
