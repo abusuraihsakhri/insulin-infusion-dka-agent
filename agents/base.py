@@ -8,6 +8,8 @@ import json
 import time
 import hmac
 import hashlib
+import secrets
+import copy
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
@@ -55,52 +57,69 @@ class PHIGuard:
 
 
 class AuditTrail:
-    """Cryptographic Tamper-Evident HMAC-SHA256 Audit Trail."""
+    """In-memory HMAC-SHA256 hash chain. Not durable, immutable, or HIPAA-certified."""
+
+    GENESIS = "GENESIS_BLOCK_0000000000000000"
+
     def __init__(self, secret_key: Optional[str] = None):
-        resolved_key = secret_key or os.getenv("AUDIT_SECRET_KEY")
+        resolved_key = secret_key if secret_key is not None else os.getenv("AUDIT_SECRET_KEY")
+        if resolved_key in {"change-me-to-a-secure-random-key", "change-me-in-production", "DEV-ONLY-CHANGE-ME-IN-PRODUCTION"}:
+            raise ValueError("AUDIT_SECRET_KEY must not use an example/placeholder value")
+        if secret_key is None and resolved_key and len(resolved_key.encode("utf-8")) < 32:
+            raise ValueError("AUDIT_SECRET_KEY must contain at least 32 UTF-8 bytes")
         if not resolved_key:
             import warnings
             warnings.warn(
-                "AUDIT_SECRET_KEY not set. Using a development-only fallback. "
-                "Set AUDIT_SECRET_KEY env var in production.",
+                "AUDIT_SECRET_KEY is unset: an ephemeral random key will be used. "
+                "Set a stable secret for production; the in-memory trail is not persisted.",
                 RuntimeWarning,
                 stacklevel=2,
             )
-            resolved_key = "DEV-ONLY-CHANGE-ME-IN-PRODUCTION"
+            resolved_key = secrets.token_urlsafe(32)
         self.secret_key = resolved_key.encode("utf-8")
         self.logs: List[Dict[str, Any]] = []
 
+    def _signature(self, entry: Dict[str, Any]) -> str:
+        fields = ("audit_id", "timestamp", "actor", "actor_tier",
+                  "event_type", "payload_hash", "prev_hash")
+        sign_string = json.dumps([entry[field] for field in fields], ensure_ascii=False, separators=(",", ":"))
+        return hmac.new(self.secret_key, sign_string.encode("utf-8"), hashlib.sha256).hexdigest()
+
     def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:
-        payload_str = json.dumps(details, sort_keys=True)
+        for value in (actor, actor_tier, event_type):
+            assert_no_phi(value)
+        payload_str = json.dumps(details, sort_keys=True, allow_nan=False)
         assert_no_phi(payload_str)
         payload_hash = hashlib.sha256(payload_str.encode("utf-8")).hexdigest()
-        audit_id = f"AUDIT-{int(time.time()*1000)}-{len(self.logs)+1}"
-        ts = datetime.now(timezone.utc).isoformat()
-        prev_hash = self.logs[-1]["current_hash"] if self.logs else "GENESIS_BLOCK_0000000000000000"
-        sign_string = f"{audit_id}|{ts}|{actor}|{actor_tier}|{event_type}|{payload_hash}|{prev_hash}"
-        signature = hmac.new(self.secret_key, sign_string.encode("utf-8"), hashlib.sha256).hexdigest()
+        audit_id = f"AUDIT-{time.time_ns()}-{len(self.logs)+1}"
         entry = {
             "audit_id": audit_id,
-            "timestamp": ts,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "actor": actor,
             "actor_tier": actor_tier,
             "event_type": event_type,
             "payload_hash": payload_hash,
-            "prev_hash": prev_hash,
-            "current_hash": signature,
+            "prev_hash": self.logs[-1]["current_hash"] if self.logs else self.GENESIS,
         }
+        entry["current_hash"] = self._signature(entry)
         self.logs.append(entry)
-        return entry
+        return copy.deepcopy(entry)
 
     def verify_integrity(self) -> bool:
-        for i, entry in enumerate(self.logs):
-            prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
-            if entry["prev_hash"] != prev:
+        prev = self.GENESIS
+        for entry in self.logs:
+            try:
+                if entry["prev_hash"] != prev:
+                    return False
+                if not hmac.compare_digest(entry["current_hash"], self._signature(entry)):
+                    return False
+            except (KeyError, TypeError, ValueError):
                 return False
+            prev = entry["current_hash"]
         return True
 
     def get_trail(self) -> List[Dict[str, Any]]:
-        return self.logs
+        return copy.deepcopy(self.logs)
 
 
 GLOBAL_AUDIT = AuditTrail()

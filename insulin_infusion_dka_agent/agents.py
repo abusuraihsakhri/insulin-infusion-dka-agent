@@ -93,7 +93,7 @@ class DKAGuardCoordinator:
             "stat_critical_alerts": stat_count,
             "warning_alerts": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "guideline_standard": "ADA Standards of Care Diabetic Ketoacidosis",
+            "guideline_standard": "Illustrative generic metric demonstration; not a clinical rule",
             "consensus_summary": f"Multi-agent supervision completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -103,8 +103,8 @@ class DKAGuardCoordinator:
     def query_supervisory_chat(self, user_query: str) -> str:
         q = user_query.strip().lower()
         if "status" in q or "summary" in q:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in on-premises memory."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in this process's memory."
         elif "guideline" in q or "standard" in q:
             return "Active clinical surveillance operates under ADA Standards of Care Diabetic Ketoacidosis validated protocols."
         else:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel executive agent online. Zero-PHI air-gapped monitoring active."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel legacy generic metric demonstrator; no live clinical monitoring or de-identification."

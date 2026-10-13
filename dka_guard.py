@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel
-Calculates hourly IV regular insulin titration (0.1 u/kg/h), target glucose drops (50-75 mg/dL/h), 2-bag IV fluid titration, and DKA resolution criteria.
+Legacy generic metric audit demonstration; does not calculate treatment doses.
 
 Domain: Endocrinology / ICU
 Author: Dr. Abu Suraih Sakhri
@@ -13,6 +13,7 @@ import csv
 import datetime
 import sys
 import uuid
+import math
 from typing import Dict, Any, List, Optional
 
 
@@ -31,15 +32,15 @@ class Severity(str):
 class DomainKnowledgeRegistry:
     """Enterprise domain rules, guideline matrices, and evidence benchmarks."""
     SYSTEM_VERSION = "2.0.0-PRO-CLINICAL"
-    ZERO_PHI_COMPLIANCE = True
-    HIPAA_SAFE_HARBOR = "ACTIVE_ON_PREMISES"
+    ZERO_PHI_COMPLIANCE = False
+    HIPAA_SAFE_HARBOR = "NOT_ASSESSED"
 
     @staticmethod
     def audit_security_and_integrity(payload: Dict[str, Any]) -> List[str]:
         warnings = []
         for key in payload.keys():
             if any(phi_keyword in key.lower() for phi_keyword in ["patient_name", "ssn", "mrn_raw", "dob_raw"]):
-                warnings.append(f"PHI_DEFENSE_TRIGGERED: Direct identifier '{key}' masked to synthetic token.")
+                warnings.append(f"PHI_DEFENSE_TRIGGERED: Direct identifier '{key}' flagged (no automatic redaction performed).")
         return warnings
 
 class AgentAlert:
@@ -69,6 +70,8 @@ class GlucoseDropVelocityAgent:
     def evaluate(self, payload: Dict[str, Any]) -> List[AgentAlert]:
         alerts = []
         val1 = float(payload.get("metric_primary", 15.0))
+        if not math.isfinite(val1):
+            raise ValueError("metric_primary must be finite")
         if val1 > 20.0:
             alerts.append(
                 AgentAlert(
@@ -87,8 +90,10 @@ class PotassiumThresholdInterlockAgent:
     """Specialized Sub-Agent 2 for insulin-infusion-dka-agent"""
     def evaluate(self, payload: Dict[str, Any]) -> List[AgentAlert]:
         alerts = []
-        is_critical = bool(payload.get("critical_flag", False))
+        is_critical = str(payload.get("critical_flag", False)).strip().lower() in ("true", "1", "yes")
         val2 = float(payload.get("metric_secondary", 5.0))
+        if not math.isfinite(val2):
+            raise ValueError("metric_secondary must be finite")
         if is_critical or val2 > 12.0:
             alerts.append(
                 AgentAlert(
@@ -162,11 +167,11 @@ class DKAGuardCoordinator:
     def query_assistant(self, user_query: str) -> str:
         q = user_query.strip().lower()
         if "summary" in q or "status" in q:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in local air-gapped memory."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in this process's memory."
         elif "guidelines" in q or "protocol" in q:
-            return "All sub-agents operate under validated consensus clinical algorithms and CAP/CLSI/NCCN/WHO standards."
+            return "These generic thresholds are illustrative and have not been clinically validated."
         else:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel executive agent online. Continuous supervisory monitoring active across all domain parameters."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel executive agent online. Only a local mock demonstration is available."
 
 
 coordinator = DKAGuardCoordinator()
@@ -179,7 +184,7 @@ def create_app():
 
         app = FastAPI(
             title="DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel",
-            description="Calculates hourly IV regular insulin titration (0.1 u/kg/h), target glucose drops (50-75 mg/dL/h), 2-bag IV fluid titration, and DKA resolution criteria.",
+            description="Legacy generic numerical metrics demonstration; not for clinical dosing.",
             version="1.0.0",
         )
 

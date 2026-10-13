@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101d31">
+  <title>Adult DKA Laboratory Monitor — Research Worksheet</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --ink:#16263a; --muted:#58677a; --border:#dce4ed; --focus:#175eb4; }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; color:var(--ink); background:#f3f6fa; line-height:1.45; }
+    main { max-width:1050px; margin:0 auto; padding:30px 20px 64px; }
+    header { margin-bottom:24px; }
+    h1 { font-size:clamp(1.55rem,3vw,2.1rem); line-height:1.2; letter-spacing:-.035em; margin:0 0 8px; }
+    .eyebrow { font-size:.72rem; font-weight:800; letter-spacing:.12em; color:#245889; text-transform:uppercase; margin:0 0 10px; }
+    .lede { color:var(--muted); max-width:750px; margin:0; }
+    .notice { background:#fff5e7; border-left:4px solid #bb7826; padding:13px 16px; border-radius:6px; margin:22px 0; color:#55340d; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:20px; align-items:start; }
+    section.panel { border:1px solid var(--border); border-radius:14px; background:#fff; padding:22px; box-shadow:0 5px 18px #1b335008; }
+    h2 { margin:0 0 8px; font-size:1.2rem; letter-spacing:-.02em; }
+    .hint { font-size:.86rem; color:var(--muted); margin:0 0 17px; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    label { font-size:.86rem; font-weight:650; }
+    input { width:100%; background:#fdfefe; border:1px solid #aab9c9; border-radius:8px; padding:11px 12px; font:inherit; color:var(--ink); }
+    input:focus-visible,button:focus-visible,a:focus-visible { outline:3px solid #86b8f7; outline-offset:2px; }
+    .group-title { grid-column:1/-1; font-size:.8rem; font-weight:750; padding-top:10px; border-top:1px solid var(--border); color:#425773; }
+    .submit { width:100%; border:0; background:#175eaf; color:white; border-radius:9px; padding:12px; font:inherit; font-weight:700; cursor:pointer; margin-top:18px; }
+    .submit:hover { background:#104c91; }
+    .reset { border:0; background:transparent; color:#345b86; text-decoration:underline; cursor:pointer; padding:9px; font:inherit; }
+    .error { background:#fff0ed; padding:10px; border:1px solid #bd3923; border-radius:8px; color:#922c1b; }
+    .result { display:grid; gap:12px; }
+    .result .item { border-bottom:1px solid var(--border); padding-bottom:10px; }
+    .result .item:last-child { border-bottom:0; }
+    .name { display:block; color:#53657b; font-size:.8rem; font-weight:650; margin-bottom:2px; }
+    .value { margin:0; font-weight:650; }
+    .danger { color:#aa2020; }
+    .caution { color:#875417; }
+    .empty { background:#f6f8fb; border:1px dashed #acbacc; border-radius:9px; padding:17px; color:var(--muted); }
+    .footnote { margin-top:24px; font-size:.83rem; color:var(--muted); }
+    a { color:#1557a2; }
+    @media(max-width:740px) { .layout { grid-template-columns:1fr; } main { padding:22px 14px 44px; } .fields { gap:12px; } section.panel { padding:17px; } }
+    @media(max-width:390px) { .fields { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Clinical research • Adult DKA • Offline worksheet</p>
+    <h1>DKA Laboratory Monitoring Worksheet</h1>
+    <p class="lede">Review glucose trends, potassium safety thresholds and biochemical DKA resolution criteria in a synthetic or de-identified adult case. Calculations run entirely in this browser.</p>
+  </header>
+  <aside class="notice"><strong>Not for patient treatment.</strong> This educational worksheet does not diagnose DKA, determine insulin infusion rates, prescribe potassium, control pumps or replace clinician judgment. Do not enter patient identifiers. Pediatric DKA and HHS are outside scope.</aside>
+  <div class="layout">
+    <section class="panel" aria-labelledby="input-title">
+      <h2 id="input-title">Laboratory inputs</h2>
+      <p class="hint">Pre-filled values are synthetic examples. Enter concentrations in the specified units.</p>
+      <form id="dka-form">
+        <div class="fields">
+          <div class="field"><label for="glucose">Current glucose (mg/dL)</label><input required id="glucose" name="glucose" type="number" min="0" max="2000" step="any" value="190"></div>
+          <div class="field"><label for="potassium">Serum potassium (mmol/L)</label><input required id="potassium" name="potassium" type="number" min="0" max="15" step="any" value="4.0"></div>
+          <div class="field"><label for="ketones">Blood β-hydroxybutyrate (mmol/L)</label><input required id="ketones" name="ketones" type="number" min="0" max="30" step="any" value="0.5"></div>
+          <div class="field"><label for="ph">Venous pH</label><input required id="ph" name="ph" type="number" min="6" max="8" step="any" value="7.31"></div>
+          <div class="field"><label for="bicarbonate">Bicarbonate (mmol/L)</label><input required id="bicarbonate" name="bicarbonate" type="number" min="0" max="60" step="any" value="17"></div>
+          <div class="group-title">Optional glucose trend — both fields required together</div>
+          <div class="field"><label for="previousGlucose">Previous glucose (mg/dL)</label><input id="previousGlucose" name="previousGlucose" type="number" min="0" max="2000" step="any" placeholder="Optional"></div>
+          <div class="field"><label for="hours">Time elapsed (hours)</label><input id="hours" name="hours" type="number" min="0" max="168" step="any" placeholder="Optional"></div>
+        </div>
+        <button class="submit" type="submit">Evaluate laboratory criteria</button>
+        <button class="reset" type="reset">Reset to synthetic examples</button>
+        <p class="error" id="error" role="alert" hidden></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="result-title">
+      <h2 id="result-title">Interpretive results</h2>
+      <p class="hint">2024 international consensus on hyperglycemic crises in adults. These results are not a therapeutic order.</p>
+      <p id="empty" class="empty">Enter measurements and select “Evaluate laboratory criteria.”</p>
+      <div id="result" class="result" aria-live="polite" hidden>
+        <div class="item"><span class="name">Biochemical resolution criteria</span><p class="value" id="resolution"></p></div>
+        <div class="item"><span class="name">Blood β-hydroxybutyrate</span><p class="value" id="out-ketones"></p></div>
+        <div class="item"><span class="name">Venous pH / bicarbonate criterion</span><p class="value" id="acidbase"></p></div>
+        <div class="item"><span class="name">Glucose</span><p class="value" id="out-glucose"></p></div>
+        <div class="item"><span class="name">Serum potassium safety flag</span><p class="value" id="out-potassium"></p></div>
+        <div class="item"><span class="name">Glucose change (positive = falling)</span><p class="value" id="change"></p></div>
+      </div>
+    </section>
+  </div>
+  <p class="footnote">Criteria: β-hydroxybutyrate &lt;0.6 mmol/L <strong>and</strong> (venous pH ≥7.3 <strong>or</strong> bicarbonate ≥18 mmol/L); glucose &lt;200 mg/dL is additionally desirable. Potassium &lt;3.5 mmol/L is a significant safety threshold. Source: <a href="https://doi.org/10.2337/dci24-0032" target="_blank" rel="noopener noreferrer">Umpierrez et al., Diabetes Care (2024), doi:10.2337/dci24-0032</a>. No data is transmitted, persisted or shared by the worksheet itself; loading the linked publication contacts its site.</p>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>

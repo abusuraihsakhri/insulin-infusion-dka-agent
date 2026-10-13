@@ -56,7 +56,7 @@ def main(argv=None):
         dossier = supervisor.process_task(payload)
         print("=" * 80)
         print(f"  INSULIN INFUSION DKA AGENT")
-        print(f"  Domain: Clinical Pharmacology & Pharmacogenomics | Standard: CPIC Level A / FDA Guidance / ISMP Safety Standards")
+        print(f"  Domain: Clinical Pharmacology & Pharmacogenomics | Standard: generic demonstration thresholds (not validated clinical rules)")
         print(f"  Dossier ID: {dossier.dossier_id} | Urgency: [{dossier.overall_urgency.value}]")
         print("=" * 80)
         for a in dossier.alerts:

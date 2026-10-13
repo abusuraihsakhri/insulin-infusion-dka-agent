@@ -1,7 +1,7 @@
 """
 Pydantic v2 schemas and data definitions for Insulin Infusion Dka Agent.
-Domain: Clinical Pharmacology & Pharmacogenomics
-Standard: CPIC Level A / FDA Guidance / ISMP Safety Standards
+Domain: Generic quality-control demonstrations
+Standard: Illustrative generic thresholds; not validated for patient care
 """
 import datetime
 from enum import Enum
@@ -46,7 +46,7 @@ class AgentAlert(BaseModel):
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "CPIC Level A / FDA Guidance / ISMP Safety Standards"
+    standard_reference: str = "Illustrative generic thresholds; not validated for patient care"
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
@@ -64,7 +64,7 @@ class ConsensusDossier(BaseModel):
     total_alerts: int
     critical_alerts_count: int
     alerts: List[AgentAlert]
-    standard_reference: str = "CPIC Level A / FDA Guidance / ISMP Safety Standards"
+    standard_reference: str = "Illustrative generic thresholds; not validated for patient care"
     consensus_summary: str
     audit_hash: str
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
