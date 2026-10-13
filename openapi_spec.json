@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Insulin Infusion Dka Engine API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
-    "version": "3.0.0-ENTERPRISE",
+    "title": "Insulin Infusion DKA Agent API",
+    "description": "Legacy generic task-audit demo plus research-only adult DKA lab calculations. Not a clinical treatment system.",
+    "version": "3.0.0",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
       "url": "https://github.com/abusuraihsakhri"
@@ -25,7 +25,7 @@
         "summary": "Prometheus operational metrics",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "Operational counters as JSON, not Prometheus text"
           }
         }
       }
@@ -76,7 +76,7 @@
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Return an offline, deterministic mock response (no language-model inference)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -103,10 +103,73 @@
     },
     "/api/audit/logs": {
       "get": {
-        "summary": "Retrieve and cryptographically verify HMAC audit trail",
+        "summary": "Read in-memory audit chain (requires configured X-Audit-Token)",
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          },
+          "403": {
+            "description": "Disabled or unauthorized"
+          }
+        }
+      }
+    },
+    "/api/dka-monitor": {
+      "post": {
+        "summary": "Research-only adult DKA laboratory interpretation; no medication dosing",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "glucose_mg_dl",
+                  "potassium_mmol_l",
+                  "beta_hydroxybutyrate_mmol_l",
+                  "venous_ph",
+                  "bicarbonate_mmol_l"
+                ],
+                "properties": {
+                  "glucose_mg_dl": {
+                    "type": "number"
+                  },
+                  "potassium_mmol_l": {
+                    "type": "number"
+                  },
+                  "beta_hydroxybutyrate_mmol_l": {
+                    "type": "number"
+                  },
+                  "venous_ph": {
+                    "type": "number"
+                  },
+                  "bicarbonate_mmol_l": {
+                    "type": "number"
+                  },
+                  "previous_glucose_mg_dl": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "hours_between_measurements": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Descriptive laboratory flags and glucose trend"
+          },
+          "422": {
+            "description": "Invalid measurements"
           }
         }
       }
