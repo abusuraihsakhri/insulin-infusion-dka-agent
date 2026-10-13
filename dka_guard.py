@@ -13,6 +13,7 @@ import csv
 import datetime
 import sys
 import uuid
+import math
 from typing import Dict, Any, List, Optional
 
 
@@ -69,6 +70,8 @@ class GlucoseDropVelocityAgent:
     def evaluate(self, payload: Dict[str, Any]) -> List[AgentAlert]:
         alerts = []
         val1 = float(payload.get("metric_primary", 15.0))
+        if not math.isfinite(val1):
+            raise ValueError("metric_primary must be finite")
         if val1 > 20.0:
             alerts.append(
                 AgentAlert(
@@ -89,6 +92,8 @@ class PotassiumThresholdInterlockAgent:
         alerts = []
         is_critical = str(payload.get("critical_flag", False)).strip().lower() in ("true", "1", "yes")
         val2 = float(payload.get("metric_secondary", 5.0))
+        if not math.isfinite(val2):
+            raise ValueError("metric_secondary must be finite")
         if is_critical or val2 > 12.0:
             alerts.append(
                 AgentAlert(
