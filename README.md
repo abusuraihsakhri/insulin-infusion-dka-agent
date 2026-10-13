@@ -1,175 +1,100 @@
 # Insulin Infusion DKA Agent
 
-> **Domain:** Clinical Pharmacology & Precision Pharmacotherapy
-> **Reference Guidelines & Standards:** CPIC Guidelines & FDA Table of Pharmacogenomic Biomarkers
+Research-oriented laboratory monitoring worksheet for **adult diabetic ketoacidosis (DKA)**, together with legacy generic task-audit demonstrations. The browser worksheet is self-contained; it does not require Python, a server API, accounts, or an internet connection after the page loads.
 
-<div align="center">
+> **Research/education only — not for clinical care.** This repository is not a validated medical device or a treatment protocol. It does not diagnose DKA/HHS, prescribe insulin or potassium, control infusion pumps, or perform real-time patient surveillance. Do not enter identifiable patient information. Pediatric DKA and HHS are outside the worksheet's scope.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Browser worksheet
 
-</div>
+The static application in [`index.html`](index.html) provides:
 
----
+- Current adult DKA biochemical resolution comparison: blood β-hydroxybutyrate **<0.6 mmol/L** and (**venous pH ≥7.3** or **bicarbonate ≥18 mmol/L**).
+- Glucose <200 mg/dL as a desirable additional marker, not a mandatory biochemical resolution criterion.
+- Potassium <3.5 mmol/L flagged for clinician review, without medication instructions.
+- Optional signed hourly change in glucose, calculated as (previous glucose − current glucose) / elapsed hours.
+- Range/finite-value checks, synthetic defaults, keyboard-accessible inputs, and no data persistence.
 
-## 📖 What It Does
+Clinical source: Umpierrez et al. *Hyperglycemic Crises in Adults With Diabetes: A Consensus Report*. *Diabetes Care*. 2024;47:1257–1275. [doi:10.2337/dci24-0032](https://doi.org/10.2337/dci24-0032). The consensus report describes DKA biochemical resolution with ketones and pH/bicarbonate rather than the anion gap.
 
-**Insulin Infusion DKA Agent** is an advanced analytical and computational platform implementing DKA/HHS Hourly Regular Insulin & Potassium Interlock Sentinel. It evaluates clinical metrics through specialized worker agents, enforces zero-PHI outbound data protection, and maintains a cryptographically tamper-evident audit trail.
-
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-### 🔬 Core Algorithmic & Evaluation Engines
-
-- **`Severity`** — dedicated module for severity evaluation and state verification.
-- **`DomainKnowledgeRegistry`**: Enterprise domain rules, guideline matrices, and evidence benchmarks.
-- **`AgentAlert`** — dedicated module for agent alert evaluation and state verification.
-- **`GlucoseDropVelocityAgent`**: Specialized Sub-Agent 1 for insulin-infusion-dka-agent
-- **`PotassiumThresholdInterlockAgent`**: Specialized Sub-Agent 2 for insulin-infusion-dka-agent
-- **`DKAResolutionAuditorAgent`**: Specialized Sub-Agent 3 for insulin-infusion-dka-agent
-
----
-
-## 🚀 Installation
+To run the site locally, from the repository root:
 
 ```bash
-# Clone the repository
-git clone https://github.com/abusuraihsakhri/insulin-infusion-dka-agent.git
-cd insulin-infusion-dka-agent
-
-# Install production dependencies
-pip install -e .
-
-# Install development dependencies (for testing)
-pip install -e ".[dev]"
-
-# Configure environment
-cp .env.example .env
-# Edit .env to set your AUDIT_SECRET_KEY
+python -m http.server 8001
+# Open http://127.0.0.1:8001/
 ```
 
----
+Modern browsers with JavaScript ES module support are required. No Pyodide is needed: the standalone calculations use JavaScript (`dka_math.mjs`), with a corresponding Python reference implementation (`insulin_infusion_dka_agent/dka_monitor.py`).
 
-## 💻 CLI Quickstart & Usage
+## Python installation and tests
 
-### 1. Run Single Audit
+Requires Python 3.9+ (CI tests 3.10–3.12); Node.js 22 is used for the browser calculation regression tests.
+
 ```bash
-python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
+python -m pip install -e ".[dev]"
+python -m pytest -q
+node --test tests/test_browser_math.mjs
 ```
 
-### 2. Query Supervisory Chat
-```bash
-python cli.py chat "What is the system status?"
+Python example using synthetic measurements:
+
+```python
+from insulin_infusion_dka_agent.dka_monitor import evaluate_adult_dka_labs
+
+result = evaluate_adult_dka_labs(
+    glucose_mg_dl=190,
+    potassium_mmol_l=4.0,
+    beta_hydroxybutyrate_mmol_l=0.5,
+    venous_ph=7.31,
+    bicarbonate_mmol_l=17.0,
+)
+print(result.to_dict())
 ```
 
-### 3. Batch Process CSV
-```bash
-python cli.py batch -i sample.csv -o results.csv
-```
+## Legacy generic metric-audit CLI and REST API
 
-### 4. Verify Audit Trail Integrity
+The three historical entry points (`cli.py`, `dka_guard.py`, and `insulin_infusion_dka_agent/cli.py`) remain for compatibility. Their *primary/secondary metric* cutoffs are **illustrative and not clinically validated DKA or insulin infusion rules**.
+
 ```bash
+python cli.py audit --task-id DEMO-1 --target SYNTH-01 --primary 28.5 --secondary 14.2
+python cli.py chat "status"
 python cli.py verify-audit
-```
-
-### 5. Launch REST API Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference
-- `--task-id`: Unique task/case identifier
-- `--target`: Target entity or specimen identifier
-- `--primary`: Primary metric measurement (float)
-- `--secondary`: Secondary metric measurement (float)
-- `--critical`: Flag for emergency escalation
-- `--status`: Status descriptor (e.g., NOMINAL, DISCORDANT)
+The FastAPI server exposes `GET /health`, `GET /metrics` (JSON), `POST /api/audit` (legacy generic audit), `POST /api/chat` (mock only), and `POST /api/dka-monitor` (research-only lab calculations). Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
-### Input Data Schema (CSV Batch)
-
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Unique task identifier | Required |
-| `target_identifier` | Target entity identifier | Required |
-| `primary_metric` | Primary measurement value | Required |
-| `secondary_metric` | Secondary measurement value | Required |
-| `status_descriptor` | Status code or phenotype | Optional |
-| `is_critical_flag` | Emergency escalation flag | Optional |
-
----
-
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, emails, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Input Validation:** All metric values validated as finite numbers (NaN/Inf rejected).
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+Sample laboratory-monitoring request:
 
 ```bash
-pytest -v
+curl -X POST http://127.0.0.1:8000/api/dka-monitor \
+  -H 'Content-Type: application/json' \
+  -d '{"glucose_mg_dl":190,"potassium_mmol_l":4.0,"beta_hydroxybutyrate_mmol_l":0.5,"venous_ph":7.31,"bicarbonate_mmol_l":17.0}'
 ```
 
-Execute high-throughput batch simulation benchmarks:
+The packaged CLI `insulin-infusion-dka-engine` serves the alternative legacy API in `insulin_infusion_dka_agent/server.py`, which also provides `POST /api/dka-monitor`. It is not interchangeable with the root CLI's generic audit schema. `sample.csv` is in the alternative legacy case-audit format; it is not directly compatible with the root `cli.py batch` schema.
+
+## Security and data handling
+
+- The **browser worksheet processes inputs entirely in the browser**; it does not send inputs to a backend, use browser storage, or log values. The external DOI link is followed only when clicked.
+- The REST API receives request data and keeps generic audit dossiers in process memory. The regex-based PHI guard is **best effort**, not de-identification, regulatory compliance certification, or a guarantee that identifiers cannot be received.
+- Generic audit entries form an HMAC-SHA256 verified **in-memory** chain. This is not durable, immutable, cross-process, or a compliant medical audit record.
+- Set a strong `AUDIT_SECRET_KEY` for server use. Otherwise a random, ephemeral process key is generated. Example/default keys are rejected. `GET /api/audit/logs` is disabled unless `AUDIT_LOG_READ_TOKEN` is configured; a matching `X-Audit-Token` header is required.
+- Keep the API bound to localhost or protected behind appropriate application authentication, transport security and access controls. Docker Compose binds to `127.0.0.1:8000` by default.
+
+Optional local Docker use, after configuring a strong secret:
 
 ```bash
-python simulator.py 1000
+export AUDIT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(40))')"
+docker compose up --build
 ```
 
----
+## Structure and technology
 
-## 🐳 Container Deployment
+- `index.html`, `app.mjs`, `dka_math.mjs`: static offline-capable worksheet (HTML/CSS/vanilla JavaScript).
+- `insulin_infusion_dka_agent/dka_monitor.py`: corresponding Python clinical-laboratory calculations.
+- `agents/`: older generic task auditing, in-memory HMAC logging, optional REST API.
+- `insulin_infusion_dka_agent/`, `dka_guard.py`, `enrichment.py`: legacy demonstration modules; do not interpret their generic scores as validated clinical assessments.
+- `tests/`: Python, API, security, and browser calculation regressions.
+- `.github/workflows/ci.yml`: tests, package build, dependency audit, and GitHub Pages publication when available.
 
-```bash
-docker build -t insulin-infusion-dka-agent .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY=your-secret-key insulin-infusion-dka-agent
-```
-
-Or using Docker Compose:
-
-```bash
-AUDIT_SECRET_KEY=your-secret-key docker-compose up
-```
-
----
-
-## 📁 Project Structure
-
-```
-insulin-infusion-dka-agent/
-├── agents/                  # Core agent modules
-│   ├── api.py              # FastAPI REST endpoints
-│   ├── base.py             # Security, PHI guard, audit trail
-│   ├── models.py           # Pydantic data models
-│   ├── supervisor.py       # Master orchestrator
-│   ├── workers.py          # Specialized evaluation workers
-│   ├── llm_factory.py      # LLM provider factory
-│   ├── metrics.py          # Prometheus metrics
-│   ├── learning.py         # Bayesian calibration engine
-│   └── streamer.py         # WebSocket telemetry
-├── tests/                  # Test suite
-├── cli.py                  # Command-line interface
-├── dka_guard.py            # DKAGuard coordinator & sub-agents
-├── enrichment.py           # Enrichment feature engines
-├── simulator.py            # High-throughput simulation
-├── pyproject.toml          # Project configuration
-├── Dockerfile              # Container build
-└── docker-compose.yml      # Container orchestration
-```
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
+License: [MIT](LICENSE).
