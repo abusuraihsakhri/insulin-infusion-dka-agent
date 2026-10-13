@@ -1,236 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insulin Infusion Dka Engine — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101d31">
+  <title>Adult DKA Laboratory Monitor — Research Worksheet</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --ink:#16263a; --muted:#58677a; --border:#dce4ed; --focus:#175eb4; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:#f3f6fa; line-height:1.45; }
+    main { max-width:1050px; margin:0 auto; padding:30px 20px 64px; }
+    header { margin-bottom:24px; }
+    h1 { font-size:clamp(1.55rem,3vw,2.1rem); line-height:1.2; letter-spacing:-.035em; margin:0 0 8px; }
+    .eyebrow { font-size:.72rem; font-weight:800; letter-spacing:.12em; color:#245889; text-transform:uppercase; margin:0 0 10px; }
+    .lede { color:var(--muted); max-width:750px; margin:0; }
+    .notice { background:#fff5e7; border-left:4px solid #bb7826; padding:13px 16px; border-radius:6px; margin:22px 0; color:#55340d; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.9fr); gap:20px; align-items:start; }
+    section.panel { border:1px solid var(--border); border-radius:14px; background:#fff; padding:22px; box-shadow:0 5px 18px #1b335008; }
+    h2 { margin:0 0 8px; font-size:1.2rem; letter-spacing:-.02em; }
+    .hint { font-size:.86rem; color:var(--muted); margin:0 0 17px; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    label { font-size:.86rem; font-weight:650; }
+    input { width:100%; background:#fdfefe; border:1px solid #aab9c9; border-radius:8px; padding:11px 12px; font:inherit; color:var(--ink); }
+    input:focus-visible,button:focus-visible,a:focus-visible { outline:3px solid #86b8f7; outline-offset:2px; }
+    .group-title { grid-column:1/-1; font-size:.8rem; font-weight:750; padding-top:10px; border-top:1px solid var(--border); color:#425773; }
+    .submit { width:100%; border:0; background:#175eaf; color:white; border-radius:9px; padding:12px; font:inherit; font-weight:700; cursor:pointer; margin-top:18px; }
+    .submit:hover { background:#104c91; }
+    .reset { border:0; background:transparent; color:#345b86; text-decoration:underline; cursor:pointer; padding:9px; font:inherit; }
+    .error { background:#fff0ed; padding:10px; border:1px solid #bd3923; border-radius:8px; color:#922c1b; }
+    .result { display:grid; gap:12px; }
+    .result .item { border-bottom:1px solid var(--border); padding-bottom:10px; }
+    .result .item:last-child { border-bottom:0; }
+    .name { display:block; color:#53657b; font-size:.8rem; font-weight:650; margin-bottom:2px; }
+    .value { margin:0; font-weight:650; }
+    .danger { color:#aa2020; }
+    .caution { color:#875417; }
+    .empty { background:#f6f8fb; border:1px dashed #acbacc; border-radius:9px; padding:17px; color:var(--muted); }
+    .footnote { margin-top:24px; font-size:.83rem; color:var(--muted); }
+    a { color:#1557a2; }
+    @media(max-width:740px) { .layout { grid-template-columns:1fr; } main { padding:22px 14px 44px; } .fields { gap:12px; } section.panel { padding:17px; } }
+    @media(max-width:390px) { .fields { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <h1>Insulin Infusion Dka Engine</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
+<main>
+  <header>
+    <p class="eyebrow">Clinical research • Adult DKA • Offline worksheet</p>
+    <h1>DKA Laboratory Monitoring Worksheet</h1>
+    <p class="lede">Review glucose trends, potassium safety thresholds and biochemical DKA resolution criteria in a synthetic or de-identified adult case. Calculations run entirely in this browser.</p>
+  </header>
+  <aside class="notice"><strong>Not for patient treatment.</strong> This educational worksheet does not diagnose DKA, determine insulin infusion rates, prescribe potassium, control pumps or replace clinician judgment. Do not enter patient identifiers. Pediatric DKA and HHS are outside scope.</aside>
+  <div class="layout">
+    <section class="panel" aria-labelledby="input-title">
+      <h2 id="input-title">Laboratory inputs</h2>
+      <p class="hint">Pre-filled values are synthetic examples. Enter concentrations in the specified units.</p>
+      <form id="dka-form">
+        <div class="fields">
+          <div class="field"><label for="glucose">Current glucose (mg/dL)</label><input required id="glucose" name="glucose" type="number" min="0" max="2000" step="any" value="190"></div>
+          <div class="field"><label for="potassium">Serum potassium (mmol/L)</label><input required id="potassium" name="potassium" type="number" min="0" max="15" step="any" value="4.0"></div>
+          <div class="field"><label for="ketones">Blood β-hydroxybutyrate (mmol/L)</label><input required id="ketones" name="ketones" type="number" min="0" max="30" step="any" value="0.5"></div>
+          <div class="field"><label for="ph">Venous pH</label><input required id="ph" name="ph" type="number" min="6" max="8" step="any" value="7.31"></div>
+          <div class="field"><label for="bicarbonate">Bicarbonate (mmol/L)</label><input required id="bicarbonate" name="bicarbonate" type="number" min="0" max="60" step="any" value="17"></div>
+          <div class="group-title">Optional glucose trend — both fields required together</div>
+          <div class="field"><label for="previousGlucose">Previous glucose (mg/dL)</label><input id="previousGlucose" name="previousGlucose" type="number" min="0" max="2000" step="any" placeholder="Optional"></div>
+          <div class="field"><label for="hours">Time elapsed (hours)</label><input id="hours" name="hours" type="number" min="0" max="168" step="any" placeholder="Optional"></div>
         </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Insulin Infusion Dka Engine Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "insulin-infusion-dka-engine",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+        <button class="submit" type="submit">Evaluate laboratory criteria</button>
+        <button class="reset" type="reset">Reset to synthetic examples</button>
+        <p class="error" id="error" role="alert" hidden></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="result-title">
+      <h2 id="result-title">Interpretive results</h2>
+      <p class="hint">2024 international consensus on hyperglycemic crises in adults. These results are not a therapeutic order.</p>
+      <p id="empty" class="empty">Enter measurements and select “Evaluate laboratory criteria.”</p>
+      <div id="result" class="result" aria-live="polite" hidden>
+        <div class="item"><span class="name">Biochemical resolution criteria</span><p class="value" id="resolution"></p></div>
+        <div class="item"><span class="name">Blood β-hydroxybutyrate</span><p class="value" id="ketones"></p></div>
+        <div class="item"><span class="name">Venous pH / bicarbonate criterion</span><p class="value" id="acidbase"></p></div>
+        <div class="item"><span class="name">Glucose</span><p class="value" id="glucose"></p></div>
+        <div class="item"><span class="name">Serum potassium safety flag</span><p class="value" id="potassium"></p></div>
+        <div class="item"><span class="name">Glucose change (positive = falling)</span><p class="value" id="change"></p></div>
+      </div>
+    </section>
+  </div>
+  <p class="footnote">Criteria: β-hydroxybutyrate &lt;0.6 mmol/L <strong>and</strong> (venous pH ≥7.3 <strong>or</strong> bicarbonate ≥18 mmol/L); glucose &lt;200 mg/dL is additionally desirable. Potassium &lt;3.5 mmol/L is a significant safety threshold. Source: <a href="https://doi.org/10.2337/dci24-0032" target="_blank" rel="noopener noreferrer">Umpierrez et al., Diabetes Care (2024), doi:10.2337/dci24-0032</a>. No data is transmitted, persisted or shared by the worksheet itself; loading the linked publication contacts its site.</p>
+</main>
+<script type="module" src="../app.mjs"></script>
 </body>
 </html>
