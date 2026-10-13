@@ -4,7 +4,7 @@ const form = document.querySelector('#dka-form');
 const result = document.querySelector('#result');
 const error = document.querySelector('#error');
 const output = (name, value) => {
-  document.querySelector(`#${name}`).textContent = value;
+  document.querySelector(`#${['glucose', 'potassium', 'ketones'].includes(name) ? 'out-' : ''}${name}`).textContent = value;
 };
 
 function numeric(name, optional = false) {
@@ -51,6 +51,7 @@ form.addEventListener('submit', (event) => {
     banner.classList.toggle('danger', data.lowPotassium);
     document.querySelector('#resolution').classList.toggle('caution', !data.resolutionCriteriaMet);
     result.hidden = false;
+    document.querySelector('#empty').hidden = true;
   } catch (e) {
     error.textContent = e.message || 'Invalid measurement.';
     error.hidden = false;
@@ -60,4 +61,5 @@ form.addEventListener('submit', (event) => {
 form.addEventListener('reset', () => {
   result.hidden = true;
   error.hidden = true;
+  document.querySelector('#empty').hidden = false;
 });
