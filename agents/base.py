@@ -65,6 +65,8 @@ class AuditTrail:
         resolved_key = secret_key if secret_key is not None else os.getenv("AUDIT_SECRET_KEY")
         if resolved_key in {"change-me-to-a-secure-random-key", "change-me-in-production", "DEV-ONLY-CHANGE-ME-IN-PRODUCTION"}:
             raise ValueError("AUDIT_SECRET_KEY must not use an example/placeholder value")
+        if secret_key is None and resolved_key and len(resolved_key.encode("utf-8")) < 32:
+            raise ValueError("AUDIT_SECRET_KEY must contain at least 32 UTF-8 bytes")
         if not resolved_key:
             import warnings
             warnings.warn(
@@ -80,7 +82,7 @@ class AuditTrail:
     def _signature(self, entry: Dict[str, Any]) -> str:
         fields = ("audit_id", "timestamp", "actor", "actor_tier",
                   "event_type", "payload_hash", "prev_hash")
-        sign_string = "|".join(entry[field] for field in fields)
+        sign_string = json.dumps([entry[field] for field in fields], ensure_ascii=False, separators=(",", ":"))
         return hmac.new(self.secret_key, sign_string.encode("utf-8"), hashlib.sha256).hexdigest()
 
     def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:
