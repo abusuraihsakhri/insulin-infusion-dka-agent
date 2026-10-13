@@ -2,6 +2,7 @@
 FastAPI REST Application & Webhooks for DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel.
 """
 from typing import Dict, Any, Optional
+from agents.base import PHIGuard, SecurityException
 from .models import ClinicalCasePayload
 from .agents import DKAGuardCoordinator
 
@@ -10,11 +11,11 @@ coordinator = DKAGuardCoordinator()
 def create_app():
     try:
         from fastapi import FastAPI
-        from pydantic import BaseModel
+        from pydantic import BaseModel, Field
 
         app = FastAPI(
             title="DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel",
-            description="Calculates hourly IV regular insulin titration (0.1 u/kg/h), target glucose drops (50-75 mg/dL/h), 2-bag IV fluid titration, and DKA resolution criteria.",
+            description="Legacy generic metric audit demonstration; does not implement treatment or dosing decisions.",
             version="2.0.0-PRO",
         )
 
@@ -26,7 +27,7 @@ def create_app():
             status_flag: str = "DISCORDANT"
             is_stat: bool = True
             clinical_notes: str = ""
-            biomarkers: Dict[str, Any] = {}
+            biomarkers: Dict[str, Any] = Field(default_factory=dict)
 
         class ChatRequest(BaseModel):
             query: str
@@ -37,6 +38,11 @@ def create_app():
 
         @app.post("/api/audit")
         def api_audit(req: AuditRequest):
+            try:
+                PHIGuard.assert_no_phi(req.model_dump_json())
+            except SecurityException:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=422, detail="Possible identifier detected. Use synthetic data only.") from None
             payload = ClinicalCasePayload(
                 case_id=req.case_id,
                 patient_synthetic_id=req.patient_synthetic_id,
