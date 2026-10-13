@@ -79,3 +79,17 @@ def test_dka_monitor_endpoint_and_invalid_inputs():
     assert r.json()["biochemical_resolution_criteria_met"] is True
     assert client.post("/api/dka-monitor", json={**values, "potassium_mmol_l": -2}).status_code == 422
     assert client.post("/api/dka-monitor", json={**values, "patient_name": "identifiable"}).status_code == 422
+
+
+def test_audit_signing_is_not_ambiguous_across_delimiters():
+    trail = AuditTrail(secret_key="a-fixture-secret")
+    trail.log("worker|tier", "service", "EVALUATED", {"status": "ok"})
+    trail.logs[0]["actor"] = "worker"
+    trail.logs[0]["actor_tier"] = "tier|service"
+    assert not trail.verify_integrity()
+
+
+def test_configured_short_key_rejected(monkeypatch):
+    monkeypatch.setenv("AUDIT_SECRET_KEY", "short")
+    with pytest.raises(ValueError, match="32 UTF-8"):
+        AuditTrail()
