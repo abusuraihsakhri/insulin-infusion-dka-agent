@@ -1,7 +1,7 @@
 """
 Clinical Data Models & Enums for DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel.
 Domain: Endocrinology / ICU
-Standard: ADA Standards of Care Diabetic Ketoacidosis
+Standard: Illustrative generic metric demonstration; not a clinical rule
 """
 import datetime
 from dataclasses import dataclass, field
@@ -43,7 +43,7 @@ class AgentAlert:
     title: str
     clinical_finding: str
     actionable_recommendation: str
-    guideline_citation: str = "ADA Standards of Care Diabetic Ketoacidosis"
+    guideline_citation: str = "Illustrative generic metric demonstration; not a clinical rule"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
