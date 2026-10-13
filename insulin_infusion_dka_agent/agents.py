@@ -93,7 +93,7 @@ class DKAGuardCoordinator:
             "stat_critical_alerts": stat_count,
             "warning_alerts": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "guideline_standard": "ADA Standards of Care Diabetic Ketoacidosis",
+            "guideline_standard": "Illustrative generic metric demonstration; not a clinical rule",
             "consensus_summary": f"Multi-agent supervision completed across 3 sub-agents with status [{status.value}].",
         }
 
