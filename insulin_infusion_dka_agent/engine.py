@@ -1,7 +1,7 @@
 """
 Clinical Algorithmic Engine & Guideline Rules for DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel.
 Domain: Endocrinology / ICU
-Standard: ADA Standards of Care Diabetic Ketoacidosis
+Standard: illustrative metric thresholds; not clinical DKA rules
 """
 import math
 from typing import Dict, Any, List, Optional
@@ -9,7 +9,7 @@ from .models import ClinicalCasePayload, AgentAlert, UrgencyLevel, ClinicalInteg
 
 
 class ClinicalDomainEngine:
-    GUIDELINE = "ADA Standards of Care Diabetic Ketoacidosis"
+    GUIDELINE = "illustrative metric thresholds; not clinical DKA rules"
     PRIMARY_BASELINE_LIMIT = 20.0
     SECONDARY_ALERT_LIMIT = 10.0
 
@@ -18,8 +18,8 @@ class ClinicalDomainEngine:
         if value > cls.PRIMARY_BASELINE_LIMIT:
             return {
                 "title": "Primary Metric Threshold Exceeded",
-                "finding": f"Observed value ({value:.2f}) exceeds ADA Standards of Care Diabetic Ketoacidosis clinical baseline limit ({cls.PRIMARY_BASELINE_LIMIT:.1f}).",
-                "recommendation": "Perform immediate secondary verification and calibration review.",
+                "finding": f"Observed value ({value:.2f}) exceeds illustrative metric thresholds; not clinical DKA rules clinical baseline limit ({cls.PRIMARY_BASELINE_LIMIT:.1f}).",
+                "recommendation": "Review the generic numerical threshold and its applicability before interpretation.",
             }
         return None
 
@@ -29,7 +29,7 @@ class ClinicalDomainEngine:
             return {
                 "title": "STAT Kinetic Escalation Triggered",
                 "finding": f"Kinetic parameter ({value:.2f}) with STAT={is_stat} requires prioritized supervision.",
-                "recommendation": "Activate closed-loop verbal clinician notification protocol per Joint Commission standards.",
+                "recommendation": "Review this illustrative escalation flag; no clinical action is authorized.",
             }
         return None
 
@@ -40,6 +40,6 @@ class ClinicalDomainEngine:
             return {
                 "title": "Phenotypic / Biomarker Discordance Identified",
                 "finding": f"Status flag '{status_flag}' indicates divergence from standard diagnostic concordance.",
-                "recommendation": f"Order reflex confirmatory testing per ADA Standards of Care Diabetic Ketoacidosis clinical recommendations.",
+                "recommendation": "Review the status descriptor; no diagnostic action is authorized.",
             }
         return None
