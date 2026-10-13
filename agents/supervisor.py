@@ -77,5 +77,5 @@ class SystemSupervisor:
 
     def query_supervisory_chat(self, query: str) -> str:
         PHIGuard.assert_no_phi(query)
-        prompt = f"Supervisor inquiry for Insulin Infusion Dka Agent under CPIC Level A / FDA Guidance / ISMP Safety Standards: {query}"
+        prompt = f"Supervisor inquiry for Insulin Infusion Dka Agent under illustrative generic thresholds; not for clinical use: {query}"
         return self.llm.invoke(prompt)
