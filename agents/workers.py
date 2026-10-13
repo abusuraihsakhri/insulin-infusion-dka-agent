@@ -1,7 +1,7 @@
 """
 Specialized Domain Worker Agents for Insulin Infusion Dka Agent.
-Domain: Clinical Pharmacology & Pharmacogenomics
-Standard: CPIC Level A / FDA Guidance / ISMP Safety Standards
+Domain: Generic quality-control demonstrations
+Standard: illustrative metric thresholds (not clinical rules)
 """
 import uuid
 from typing import Dict, Any, List, Optional
@@ -20,7 +20,7 @@ class InvariantQCWorker:
                 origin_worker="InvariantQCWorker",
                 urgency=UrgencyLevel.ELEVATED,
                 summary="Primary Metric Threshold Exceeded",
-                technical_details=f"Primary measurement ({payload.primary_metric:.2f}) exceeds upper reference limit (25.00) under CPIC Level A / FDA Guidance / ISMP Safety Standards.",
+                technical_details=f"Primary measurement ({payload.primary_metric:.2f}) exceeds upper reference limit (25.00) under illustrative metric thresholds (not clinical rules).",
                 actionable_remediation="Initiate recalibration workflow and review secondary parameters.",
             ))
         return alerts
@@ -57,7 +57,7 @@ class ProtocolConformanceWorker:
                 origin_worker="ProtocolConformanceWorker",
                 urgency=UrgencyLevel.ELEVATED,
                 summary="Protocol Conformance Discordance Detected",
-                technical_details=f"Descriptor '{payload.status_descriptor}' indicates discordance with CPIC Level A / FDA Guidance / ISMP Safety Standards standards.",
+                technical_details=f"Descriptor '{payload.status_descriptor}' indicates discordance with illustrative metric thresholds (not clinical rules) standards.",
                 actionable_remediation="Re-evaluate input specimen or rerun secondary confirmation assay.",
             ))
         return alerts
