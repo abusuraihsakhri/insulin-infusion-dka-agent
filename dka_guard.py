@@ -39,7 +39,7 @@ class DomainKnowledgeRegistry:
         warnings = []
         for key in payload.keys():
             if any(phi_keyword in key.lower() for phi_keyword in ["patient_name", "ssn", "mrn_raw", "dob_raw"]):
-                warnings.append(f"PHI_DEFENSE_TRIGGERED: Direct identifier '{key}' masked to synthetic token.")
+                warnings.append(f"PHI_DEFENSE_TRIGGERED: Direct identifier '{key}' flagged (no automatic redaction performed).")
         return warnings
 
 class AgentAlert:
@@ -162,7 +162,7 @@ class DKAGuardCoordinator:
     def query_assistant(self, user_query: str) -> str:
         q = user_query.strip().lower()
         if "summary" in q or "status" in q:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in local air-gapped memory."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in this process's memory."
         elif "guidelines" in q or "protocol" in q:
             return "These generic thresholds are illustrative and have not been clinically validated."
         else:
