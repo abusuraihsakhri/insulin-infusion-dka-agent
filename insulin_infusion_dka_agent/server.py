@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional
 from agents.base import PHIGuard, SecurityException
 from .models import ClinicalCasePayload
 from .agents import DKAGuardCoordinator
+from .dka_monitor import evaluate_adult_dka_labs
 
 coordinator = DKAGuardCoordinator()
 
@@ -58,6 +59,25 @@ def create_app():
         @app.post("/api/chat")
         def api_chat(req: ChatRequest):
             return {"response": coordinator.query_supervisory_chat(req.query)}
+
+        class DKALabRequest(BaseModel):
+            glucose_mg_dl: float
+            potassium_mmol_l: float
+            beta_hydroxybutyrate_mmol_l: float
+            venous_ph: float
+            bicarbonate_mmol_l: float
+            previous_glucose_mg_dl: Optional[float] = None
+            hours_between_measurements: Optional[float] = None
+
+            model_config = {"extra": "forbid"}
+
+        @app.post("/api/dka-monitor")
+        def api_dka_monitor(req: DKALabRequest):
+            from fastapi import HTTPException
+            try:
+                return evaluate_adult_dka_labs(**req.model_dump()).to_dict()
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from None
 
         return app
     except ImportError:
