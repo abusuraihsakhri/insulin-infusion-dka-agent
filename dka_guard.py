@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel
-Calculates hourly IV regular insulin titration (0.1 u/kg/h), target glucose drops (50-75 mg/dL/h), 2-bag IV fluid titration, and DKA resolution criteria.
+Legacy generic metric audit demonstration; does not calculate treatment doses.
 
 Domain: Endocrinology / ICU
 Author: Dr. Abu Suraih Sakhri
@@ -31,8 +31,8 @@ class Severity(str):
 class DomainKnowledgeRegistry:
     """Enterprise domain rules, guideline matrices, and evidence benchmarks."""
     SYSTEM_VERSION = "2.0.0-PRO-CLINICAL"
-    ZERO_PHI_COMPLIANCE = True
-    HIPAA_SAFE_HARBOR = "ACTIVE_ON_PREMISES"
+    ZERO_PHI_COMPLIANCE = False
+    HIPAA_SAFE_HARBOR = "NOT_ASSESSED"
 
     @staticmethod
     def audit_security_and_integrity(payload: Dict[str, Any]) -> List[str]:
@@ -164,9 +164,9 @@ class DKAGuardCoordinator:
         if "summary" in q or "status" in q:
             return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel currently tracking {len(self.case_registry)} cases in local air-gapped memory."
         elif "guidelines" in q or "protocol" in q:
-            return "All sub-agents operate under validated consensus clinical algorithms and CAP/CLSI/NCCN/WHO standards."
+            return "These generic thresholds are illustrative and have not been clinically validated."
         else:
-            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel executive agent online. Continuous supervisory monitoring active across all domain parameters."
+            return f"DKAGuard: Diabetic Ketoacidosis & HHS Insulin Infusion / Potassium Sentinel executive agent online. Only a local mock demonstration is available."
 
 
 coordinator = DKAGuardCoordinator()
