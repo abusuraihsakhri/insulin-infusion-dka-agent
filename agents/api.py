@@ -5,10 +5,11 @@ import os
 import hmac
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Header
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from .base import AuditLogger, PHIGuard, SecurityException
 from .models import SystemTaskPayload, ConsensusDossier
 from .supervisor import SystemSupervisor
+from insulin_infusion_dka_agent.dka_monitor import evaluate_adult_dka_labs
 
 supervisor = SystemSupervisor(model_provider="mock")
 
@@ -54,6 +55,26 @@ def api_chat(req: ChatRequest):
         return {"response": ans}
     except SecurityException:
         raise HTTPException(status_code=422, detail="Possible identifier in query. Use synthetic data only.") from None
+
+
+class DKALabRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    glucose_mg_dl: float
+    potassium_mmol_l: float
+    beta_hydroxybutyrate_mmol_l: float
+    venous_ph: float
+    bicarbonate_mmol_l: float
+    previous_glucose_mg_dl: Optional[float] = None
+    hours_between_measurements: Optional[float] = None
+
+
+@app.post("/api/dka-monitor")
+def api_dka_monitor(payload: DKALabRequest):
+    """Research-only adult DKA laboratory flagging; never medication dosing."""
+    try:
+        return evaluate_adult_dka_labs(**payload.model_dump()).to_dict()
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
 
 
 @app.get("/api/audit/logs")
